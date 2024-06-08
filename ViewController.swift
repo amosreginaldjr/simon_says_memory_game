@@ -60,6 +60,9 @@ class ViewController: UIViewController
     var colorPattern: [Int] = []
     var color: Colors = .red
     
+    //variables
+    let buttonSizes: Int = 100
+    
     
     override func viewDidLoad()
     {
@@ -80,16 +83,10 @@ class ViewController: UIViewController
         //view.addSubview(buttonYellow)
         
         //begin test area
-        
-        let imageRedCircle = UIImage(named: "red_circle")
-        let imageViewRedCircle = UIImageView(image: imageRedCircle)
-        imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
-        imageView.frame = CGRect(x: 50, y: 50, width: 100, height: 100) // example frame
-        view.addSubview(imageView)
-            
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonRedAction))
-        imageView.addGestureRecognizer(tapGestureRecognizer)
-        
+        placeRedButton()
+        placeGreenButton()
+        placeBlueButton()
+        placeYellowButton()
         //end test area
         
         buttonRed.addTarget(self, action: #selector(buttonRedAction), for: .touchUpInside)
@@ -200,6 +197,18 @@ class ViewController: UIViewController
         self.view.backgroundColor = .systemRed
     }
     
+    func placeRedButton() -> Void
+    {
+        let imageRedCircle = UIImage(named: "red_circle")
+        let imageView = UIImageView(image: imageRedCircle)
+        imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
+        imageView.frame = CGRect(x: 210, y: 460, width: buttonSizes, height: buttonSizes) // example frame
+        view.addSubview(imageView)
+            
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonRedAction))
+        imageView.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
     
     //Green Button
     private let buttonGreen: UIButton =
@@ -214,6 +223,18 @@ class ViewController: UIViewController
     @objc func buttonGreenAction()
     {
         self.view.backgroundColor = .systemGreen
+    }
+    
+    func placeGreenButton() -> Void
+    {
+        let imageGreenCircle = UIImage(named: "green_circle")
+        let imageView = UIImageView(image: imageGreenCircle)
+        imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
+        imageView.frame = CGRect(x: 110, y: 460, width: buttonSizes, height: buttonSizes) // example frame
+        view.addSubview(imageView)
+            
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonGreenAction))
+        imageView.addGestureRecognizer(tapGestureRecognizer)
     }
 
     //Blue Button
@@ -231,6 +252,18 @@ class ViewController: UIViewController
         self.view.backgroundColor = .systemBlue
     }
     
+    func placeBlueButton() -> Void
+    {
+        let imageBlueCircle = UIImage(named: "blue_circle")
+        let imageView = UIImageView(image: imageBlueCircle)
+        imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
+        imageView.frame = CGRect(x: 210, y: 370, width: buttonSizes, height: buttonSizes) // example frame
+        view.addSubview(imageView)
+            
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonBlueAction))
+        imageView.addGestureRecognizer(tapGestureRecognizer)
+    }
+    
     //Yellow Button
     private let buttonYellow: UIButton =
     {
@@ -246,38 +279,16 @@ class ViewController: UIViewController
         self.view.backgroundColor = .systemYellow
     }
     
-    //All The Buttons Positions
-    override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        
-        //width height
-        //let width: Int = 90
-        //let height: Int = 90
-        
-        //Red Button Placement
-//        buttonRed.frame = CGRect(x:30,
-//                                 y:view.frame.size.height-150-view.safeAreaInsets.bottom,
-//                                 width: view.frame.size.width-60,
-//                                 height: 55)
-        
-        
-        
-        //Green Button Placement
-        buttonGreen.frame = CGRect(x:30,
-                                   y:view.frame.size.height-95-view.safeAreaInsets.bottom,
-                                   width: view.frame.size.width-60,
-                                   height: 55)
-        
-        //Blue Button Placement
-        buttonBlue.frame = CGRect(x:30,
-                                  y:view.frame.size.height-40-view.safeAreaInsets.bottom,
-                                  width: view.frame.size.width-60,
-                                  height: 55)
-        //Yellow Button Placement
-        buttonYellow.frame = CGRect(x:30,
-                                    y:view.frame.size.height-45-view.safeAreaInsets.bottom,
-                                    width: view.frame.size.width-60,
-                                    height: 55)
+    func placeYellowButton() -> Void
+    {
+        let imageYellowCircle = UIImage(named: "yellow_circle")
+        let imageView = UIImageView(image: imageYellowCircle)
+        imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
+        imageView.frame = CGRect(x: 110, y: 370, width: buttonSizes, height: buttonSizes) // example frame
+        view.addSubview(imageView)
+            
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonYellowAction))
+        imageView.addGestureRecognizer(tapGestureRecognizer)
     }
     
 }
