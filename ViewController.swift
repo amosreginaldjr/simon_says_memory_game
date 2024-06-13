@@ -39,15 +39,14 @@
 
 import UIKit
 
-class ViewController: UIViewController 
+class ViewController: UIViewController
 {
-    
     enum Colors : Int
     {
         case red = 1
-        case pink = 2
-        case green = 3
-        case indigo = 4
+        case green = 2
+        case blue = 3
+        case yellow = 4
     }
     
     // Array of colors
@@ -63,42 +62,143 @@ class ViewController: UIViewController
     //variables
     let buttonSizes: Int = 100
     
-    
+    //help from gpt
+    var currentButtonPressed: Int?
+    var pattern: [Int] = []
+    var currentSequenceElement: [Int] = []
+    var showSequence: [Int] = []
+    var currentIndex: Int = 0
+
     override func viewDidLoad()
     {
         super.viewDidLoad()
+        
+        pattern = generateSequence()
+        currentSequenceElement = pattern
+        showSequence = pattern
         
         // Add and configure the background image
         addBackgroundImage()
         
         // Start the spinning animation
         startSpinningAnimation()
-        generateNewColor()
-        //displaySequence(bkgC: colorPattern.last!)
+        
         self.view.backgroundColor = .systemMint
         
-        //view.addSubview(buttonRed)
-        //view.addSubview(buttonGreen)
-        //view.addSubview(buttonBlue)
-        //view.addSubview(buttonYellow)
-        
-        //begin test area
         placeRedButton()
         placeGreenButton()
         placeBlueButton()
         placeYellowButton()
-        //end test area
+        placeResetButton()
         
         buttonRed.addTarget(self, action: #selector(buttonRedAction), for: .touchUpInside)
         buttonGreen.addTarget(self, action: #selector(buttonGreenAction), for: .touchUpInside)
         buttonBlue.addTarget(self, action: #selector(buttonBlueAction), for: .touchUpInside)
         buttonYellow.addTarget(self, action: #selector(buttonYellowAction), for: .touchUpInside)
+        buttonRestart.addTarget(self, action: #selector(buttonResetAction), for: .touchUpInside)
         
+        lightUp()
         
+        print("\n")
+        var cur: Int = 0
+        for var element in showSequence
+        {
+            if let pressedButton = checkButtonPress(), pressedButton == currentSequenceElement[element]
+            {
+                print("entered if")
+                element += 1
+                switch cur
+                {
+                    case 0:
+                        placeBrain1()
+                    case 1:
+                        placeBrain2()
+                    case 2:
+                        placeBrain3()
+                    case 3:
+                        placeBrain4()
+                    case 4:
+                        placeBrain5()
+                    default:
+                        placeErrorBrain()
+                }
+                print("correct")
+                cur+=1
+                //LEFT OFF HERE
+                //brain show up to give user feedback
+                
+                //add confetti effect
+            }
+        }
+    }
+    
+    //show when you get the pattern right
+    func createBrainEmojiImage() -> UIImage {
+        // Create a UILabel to hold the emoji
+        let label = UILabel()
+        label.text = "🧠"
+        label.font = UIFont.systemFont(ofSize: 200)  // Adjust size as needed
+        label.sizeToFit()
+        
+        // Render the label into a UIImage
+        UIGraphicsBeginImageContextWithOptions(label.bounds.size, false, 0)
+        label.layer.render(in: UIGraphicsGetCurrentContext()!)
+        let image = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        return image
+    }
+    
+    func placeBrain1()
+    {
+        let brainImage = createBrainEmojiImage()
+        let imageView = UIImageView(image: brainImage)
+        imageView.frame = CGRect(x: 30, y: 750, width: 50, height: 50)
+        self.view.addSubview(imageView)
+    }
+    
+    func placeBrain2()
+    {
+        let brainImage = createBrainEmojiImage()
+        let imageView = UIImageView(image: brainImage)
+        imageView.frame = CGRect(x: 100, y: 750, width: 50, height: 50)
+        self.view.addSubview(imageView)
+    }
+    
+    func placeBrain3()
+    {
+        let brainImage = createBrainEmojiImage()
+        let imageView = UIImageView(image: brainImage)
+        imageView.frame = CGRect(x: 170, y: 750, width: 50, height: 50)
+        self.view.addSubview(imageView)
+    }
+    
+    func placeBrain4()
+    {
+        let brainImage = createBrainEmojiImage()
+        let imageView = UIImageView(image: brainImage)
+        imageView.frame = CGRect(x: 240, y: 750, width: 50, height: 50)
+        self.view.addSubview(imageView)
+    }
+    
+    func placeBrain5()
+    {
+        let brainImage = createBrainEmojiImage()
+        let imageView = UIImageView(image: brainImage)
+        imageView.frame = CGRect(x: 310, y: 750, width: 50, height: 50)
+        self.view.addSubview(imageView)
+    }
+    
+    func placeErrorBrain()
+    {
+        let brainImage = createBrainEmojiImage()
+        let imageView = UIImageView(image: brainImage)
+        imageView.frame = CGRect(x: 170, y: 750, width: 200, height: 200)
+        self.view.addSubview(imageView)
     }
     
     // Function to add background image
-    func addBackgroundImage() 
+    func addBackgroundImage()
     {
         // Create UIImageView
         imageView = UIImageView(frame: self.view.bounds)
@@ -117,7 +217,7 @@ class ViewController: UIViewController
     }
     
     // Function to start spinning animation
-    func startSpinningAnimation() 
+    func startSpinningAnimation()
     {
         //chatGPT helped with this function
         let rotation = CABasicAnimation(keyPath: "transform.rotation")
@@ -127,59 +227,80 @@ class ViewController: UIViewController
         rotation.repeatCount = .infinity
         imageView.layer.add(rotation, forKey: "rotationAnimation")
     }
-    
-    // Other game logic functions here...
-    func setupGame() 
-    {
-        // Example setup code
-    }
 
-    func generateNewColor() 
+    func generateSequence() -> [Int]
     {
-        let randomInt = Int.random(in: 0...3)
-        colorPattern.append(randomInt)
-    }
-
-    func displaySequence(bkgC:Int)
-    {
-        switch bkgC
+        let numberArray = (0..<5).map{ _ in Int.random(in: 0 ... 3) }
+        for int in numberArray
         {
-        case 0:
-            self.view.backgroundColor = .systemRed
-        case 1:
-            self.view.backgroundColor = .systemPink
-        case 2:
-            self.view.backgroundColor = .systemGreen
-        case 3:
-            self.view.backgroundColor = .systemIndigo
-        default:
-            self.view.backgroundColor = .black
+            print(int, terminator: " ")
+        }
+        print("\n")
+        return numberArray
+    }
+
+    func lightUp()
+    {
+        for (index, val) in currentSequenceElement.enumerated()
+        {
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.7)
+            {
+                switch val
+                {
+                case 0:
+                    self.view.backgroundColor = .red
+                case 1:
+                    self.view.backgroundColor = .green
+                case 2:
+                    self.view.backgroundColor = .blue
+                case 3:
+                    self.view.backgroundColor = .yellow
+                default:
+                    self.view.backgroundColor = .gray
+                }
+            }
         }
     }
 
-    func lightUp(color: UIColor) 
+    func checkButtonPress() -> Int?
+    {
+        guard let currentButtonPressed = currentButtonPressed else { return nil }
+        return currentButtonPressed
+    }
+
+    func checkSequence()
+    {
+        guard let currentButtonPressed = currentButtonPressed else { return }
+
+        for var element in showSequence
+        {
+            if currentButtonPressed == currentSequenceElement[element]
+            {
+                element += 1
+                if element < showSequence.count
+                {
+                    //print()
+                    print(showSequence[element], terminator: " ")
+                }
+                else
+                {
+                    print("Sequence completed.")
+                }
+            }
+        }
+    }
+
+    func gameOver()
     {
         // Example function
     }
 
-    @IBAction func colorButtonTapped(_ sender: UIButton) 
+    func resetGame()
     {
-        // Example function
-    }
-
-    func checkSequence() 
-    {
-        // Example function
-    }
-
-    func gameOver() 
-    {
-        // Example function
-    }
-
-    func resetGame() 
-    {
-        // Example function
+        currentSequenceElement = generateSequence()
+        showSequence = currentSequenceElement
+        currentIndex = 0
+        lightUp()
     }
     
     //Red Button
@@ -195,6 +316,8 @@ class ViewController: UIViewController
     @objc func buttonRedAction()
     {
         self.view.backgroundColor = .systemRed
+        currentButtonPressed = 0
+        checkSequence()
     }
     
     func placeRedButton() -> Void
@@ -202,13 +325,12 @@ class ViewController: UIViewController
         let imageRedCircle = UIImage(named: "red_circle")
         let imageView = UIImageView(image: imageRedCircle)
         imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
-        imageView.frame = CGRect(x: 210, y: 460, width: buttonSizes, height: buttonSizes) // example frame
+        imageView.frame = CGRect(x:110, y: 370, width: buttonSizes, height: buttonSizes) // example frame
         view.addSubview(imageView)
             
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonRedAction))
         imageView.addGestureRecognizer(tapGestureRecognizer)
     }
-    
     
     //Green Button
     private let buttonGreen: UIButton =
@@ -223,6 +345,8 @@ class ViewController: UIViewController
     @objc func buttonGreenAction()
     {
         self.view.backgroundColor = .systemGreen
+        currentButtonPressed = 1
+        checkSequence()
     }
     
     func placeGreenButton() -> Void
@@ -230,7 +354,7 @@ class ViewController: UIViewController
         let imageGreenCircle = UIImage(named: "green_circle")
         let imageView = UIImageView(image: imageGreenCircle)
         imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
-        imageView.frame = CGRect(x: 110, y: 460, width: buttonSizes, height: buttonSizes) // example frame
+        imageView.frame = CGRect(x: 210, y: 370, width: buttonSizes, height: buttonSizes) // example frame
         view.addSubview(imageView)
             
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonGreenAction))
@@ -250,6 +374,8 @@ class ViewController: UIViewController
     @objc func buttonBlueAction()
     {
         self.view.backgroundColor = .systemBlue
+        currentButtonPressed = 2
+        checkSequence()
     }
     
     func placeBlueButton() -> Void
@@ -257,7 +383,7 @@ class ViewController: UIViewController
         let imageBlueCircle = UIImage(named: "blue_circle")
         let imageView = UIImageView(image: imageBlueCircle)
         imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
-        imageView.frame = CGRect(x: 210, y: 370, width: buttonSizes, height: buttonSizes) // example frame
+        imageView.frame = CGRect(x: 110, y: 460, width: buttonSizes, height: buttonSizes) // example frame
         view.addSubview(imageView)
             
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonBlueAction))
@@ -277,6 +403,8 @@ class ViewController: UIViewController
     @objc func buttonYellowAction()
     {
         self.view.backgroundColor = .systemYellow
+        currentButtonPressed = 3
+        checkSequence()
     }
     
     func placeYellowButton() -> Void
@@ -284,11 +412,38 @@ class ViewController: UIViewController
         let imageYellowCircle = UIImage(named: "yellow_circle")
         let imageView = UIImageView(image: imageYellowCircle)
         imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
-        imageView.frame = CGRect(x: 110, y: 370, width: buttonSizes, height: buttonSizes) // example frame
+        imageView.frame = CGRect(x: 210, y: 460, width: buttonSizes, height: buttonSizes) // example frame
         view.addSubview(imageView)
             
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonYellowAction))
         imageView.addGestureRecognizer(tapGestureRecognizer)
     }
     
+    //reset button
+    private let buttonRestart: UIButton =
+    {
+        let button = UIButton()
+        button.backgroundColor = .systemGray
+        button.setTitle("Reset", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        return button
+    }()
+    
+    @objc func buttonResetAction()
+    {
+        self.view.backgroundColor = .systemGray
+        resetGame()
+    }
+    
+    func placeResetButton() -> Void
+    {
+        let imageResetCircle = UIImage(named: "reset_button")
+        let imageView = UIImageView(image: imageResetCircle)
+        imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
+        imageView.frame = CGRect(x: 50, y: 800, width: buttonSizes, height: buttonSizes) // example frame
+        view.addSubview(imageView)
+            
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonResetAction))
+        imageView.addGestureRecognizer(tapGestureRecognizer)
+    }
 }
