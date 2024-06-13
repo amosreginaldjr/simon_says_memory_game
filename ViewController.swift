@@ -53,7 +53,8 @@ class ViewController: UIViewController
     let colors: [UIColor] = [.systemRed, .systemPink, .systemGreen, .systemIndigo]
     
     // Declare imageView as a class-level property
-    var imageView: UIImageView!
+    var imageView: UIImageView? //previously was 'UIImageView!'
+    
     
     //colorPattern array
     var colorPattern: [Int] = []
@@ -68,6 +69,8 @@ class ViewController: UIViewController
     var currentSequenceElement: [Int] = []
     var showSequence: [Int] = []
     var currentIndex: Int = 0
+    var brainImageViews: [UIImageView] = []
+    
 
     override func viewDidLoad()
     {
@@ -99,41 +102,11 @@ class ViewController: UIViewController
         
         lightUp()
         
-        print("\n")
-        var cur: Int = 0
-        for var element in showSequence
-        {
-            if let pressedButton = checkButtonPress(), pressedButton == currentSequenceElement[element]
-            {
-                print("entered if")
-                element += 1
-                switch cur
-                {
-                    case 0:
-                        placeBrain1()
-                    case 1:
-                        placeBrain2()
-                    case 2:
-                        placeBrain3()
-                    case 3:
-                        placeBrain4()
-                    case 4:
-                        placeBrain5()
-                    default:
-                        placeErrorBrain()
-                }
-                print("correct")
-                cur+=1
-                //LEFT OFF HERE
-                //brain show up to give user feedback
-                
-                //add confetti effect
-            }
-        }
     }
     
     //show when you get the pattern right
-    func createBrainEmojiImage() -> UIImage {
+    func createBrainEmojiImage() -> UIImage 
+    {
         // Create a UILabel to hold the emoji
         let label = UILabel()
         label.text = "🧠"
@@ -149,52 +122,55 @@ class ViewController: UIViewController
         return image
     }
     
-    func placeBrain1()
+    func placeBrain(at position: CGPoint) 
     {
         let brainImage = createBrainEmojiImage()
         let imageView = UIImageView(image: brainImage)
-        imageView.frame = CGRect(x: 30, y: 750, width: 50, height: 50)
+        imageView.frame = CGRect(origin: position, size: CGSize(width: 50, height: 50))
         self.view.addSubview(imageView)
+        brainImageViews.append(imageView)
+    }
+    
+    func placeBrain1() 
+    {
+        placeBrain(at: CGPoint(x: 30, y: 750))
     }
     
     func placeBrain2()
     {
-        let brainImage = createBrainEmojiImage()
-        let imageView = UIImageView(image: brainImage)
-        imageView.frame = CGRect(x: 100, y: 750, width: 50, height: 50)
-        self.view.addSubview(imageView)
+        placeBrain(at: CGPoint(x: 100, y: 750))
     }
     
     func placeBrain3()
     {
-        let brainImage = createBrainEmojiImage()
-        let imageView = UIImageView(image: brainImage)
-        imageView.frame = CGRect(x: 170, y: 750, width: 50, height: 50)
-        self.view.addSubview(imageView)
+        placeBrain(at: CGPoint(x: 170, y: 750))
     }
     
     func placeBrain4()
     {
-        let brainImage = createBrainEmojiImage()
-        let imageView = UIImageView(image: brainImage)
-        imageView.frame = CGRect(x: 240, y: 750, width: 50, height: 50)
-        self.view.addSubview(imageView)
+        placeBrain(at: CGPoint(x: 240, y: 750))
     }
     
     func placeBrain5()
     {
-        let brainImage = createBrainEmojiImage()
-        let imageView = UIImageView(image: brainImage)
-        imageView.frame = CGRect(x: 310, y: 750, width: 50, height: 50)
-        self.view.addSubview(imageView)
+        placeBrain(at: CGPoint(x: 310, y: 750))
+    }
+    
+    func cleanupBrains()
+    {
+        for imageView in brainImageViews
+        {
+            imageView.removeFromSuperview()
+        }
+        brainImageViews.removeAll()
     }
     
     func placeErrorBrain()
     {
-        let brainImage = createBrainEmojiImage()
-        let imageView = UIImageView(image: brainImage)
-        imageView.frame = CGRect(x: 170, y: 750, width: 200, height: 200)
-        self.view.addSubview(imageView)
+        //let brainImage = createBrainEmojiImage()
+        //let imageView = UIImageView(image: brainImage)
+        //imageView.frame = CGRect(x: 170, y: 750, width: 200, height: 200)
+        //self.view.addSubview(imageView)
     }
     
     // Function to add background image
@@ -204,22 +180,31 @@ class ViewController: UIViewController
         imageView = UIImageView(frame: self.view.bounds)
         
         // Set the image
-        imageView.image = UIImage(named: "main_circle_background")
+        imageView?.image = UIImage(named: "main_circle_background")
         
         // Make sure the image maintains aspect ratio
-        imageView.contentMode = .scaleAspectFit
+        imageView?.contentMode = .scaleAspectFit
         
         // Add the UIImageView to the view hierarchy
-        self.view.addSubview(imageView)
-        
+        if let imageView = imageView 
+        {
+            self.view.addSubview(imageView)
         // Send the image view to the back so it doesn't cover other UI elements
-        self.view.sendSubviewToBack(imageView)
+            self.view.sendSubviewToBack(imageView)
+        }
+    }
+    
+    //remove the background image
+    func removeBackgroundImage()
+    {
+        imageView?.removeFromSuperview()
+        imageView = nil
     }
     
     // Function to start spinning animation
     func startSpinningAnimation()
     {
-        //chatGPT helped with this function
+        guard let imageView = imageView else { return }
         let rotation = CABasicAnimation(keyPath: "transform.rotation")
         rotation.fromValue = 0
         rotation.toValue = Double.pi * 2
@@ -243,20 +228,26 @@ class ViewController: UIViewController
     {
         for (index, val) in currentSequenceElement.enumerated()
         {
+            // Flash gray before the actual color
+//            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 2.0)
+//            {
+//                self.view.backgroundColor = .black
+//            }
+            
             DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.7)
             {
                 switch val
                 {
-                case 0:
-                    self.view.backgroundColor = .red
-                case 1:
-                    self.view.backgroundColor = .green
-                case 2:
-                    self.view.backgroundColor = .blue
-                case 3:
-                    self.view.backgroundColor = .yellow
-                default:
-                    self.view.backgroundColor = .gray
+                    case 0:
+                        self.view.backgroundColor = .red
+                    case 1:
+                        self.view.backgroundColor = .green
+                    case 2:
+                        self.view.backgroundColor = .blue
+                    case 3:
+                        self.view.backgroundColor = .yellow
+                    default:
+                        self.view.backgroundColor = .gray
                 }
             }
         }
@@ -271,22 +262,43 @@ class ViewController: UIViewController
     func checkSequence()
     {
         guard let currentButtonPressed = currentButtonPressed else { return }
-
-        for var element in showSequence
+            
+        if currentButtonPressed == currentSequenceElement[currentIndex]
         {
-            if currentButtonPressed == currentSequenceElement[element]
+            switch currentIndex 
             {
-                element += 1
-                if element < showSequence.count
-                {
-                    //print()
-                    print(showSequence[element], terminator: " ")
-                }
-                else
-                {
-                    print("Sequence completed.")
-                }
+                case 0:
+                    placeBrain1()
+                case 1:
+                    placeBrain2()
+                case 2:
+                    placeBrain3()
+                case 3:
+                    placeBrain4()
+                case 4:
+                    placeBrain5()
+                default:
+                    placeErrorBrain()
             }
+                
+            currentIndex += 1
+                
+                if currentIndex < showSequence.count 
+            {
+                // Proceed to the next element in the sequence
+                print(showSequence[currentIndex], terminator: " ")
+            } 
+            else
+            {
+                print("Sequence completed.")
+                // Optionally, you can add any additional logic here for when the sequence is completed.
+            }
+        }
+        else
+        {
+            // Handle incorrect button press (e.g., reset the game, show an error, etc.)
+            placeErrorBrain()
+            print("Incorrect button pressed.")
         }
     }
 
@@ -301,6 +313,13 @@ class ViewController: UIViewController
         showSequence = currentSequenceElement
         currentIndex = 0
         lightUp()
+        
+        removeBackgroundImage()
+        
+        addBackgroundImage()
+        startSpinningAnimation()
+        
+        cleanupBrains()
     }
     
     //Red Button
@@ -435,7 +454,7 @@ class ViewController: UIViewController
         resetGame()
     }
     
-    func placeResetButton() -> Void
+    func placeResetButton() -> Void 
     {
         let imageResetCircle = UIImage(named: "reset_button")
         let imageView = UIImageView(image: imageResetCircle)
@@ -445,5 +464,5 @@ class ViewController: UIViewController
             
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonResetAction))
         imageView.addGestureRecognizer(tapGestureRecognizer)
+        }
     }
-}
