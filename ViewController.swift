@@ -38,6 +38,8 @@
  */
 
 import UIKit
+import AVFoundation
+import Dispatch
 
 class ViewController: UIViewController
 {
@@ -62,15 +64,16 @@ class ViewController: UIViewController
     
     //variables
     let buttonSizes: Int = 100
-    
-    //help from gpt
     var currentButtonPressed: Int?
     var pattern: [Int] = []
     var currentSequenceElement: [Int] = []
     var showSequence: [Int] = []
     var currentIndex: Int = 0
     var brainImageViews: [UIImageView] = []
-    
+    var wrongInputImageViews: [UIImageView] = []
+    let audioManager = AudioManager()
+    //counters
+    var couldWinCounter: Int = 0
 
     override func viewDidLoad()
     {
@@ -93,15 +96,18 @@ class ViewController: UIViewController
         placeBlueButton()
         placeYellowButton()
         placeResetButton()
+        placePlayButton()
+        
+        //playToyButtonSound
         
         buttonRed.addTarget(self, action: #selector(buttonRedAction), for: .touchUpInside)
         buttonGreen.addTarget(self, action: #selector(buttonGreenAction), for: .touchUpInside)
         buttonBlue.addTarget(self, action: #selector(buttonBlueAction), for: .touchUpInside)
         buttonYellow.addTarget(self, action: #selector(buttonYellowAction), for: .touchUpInside)
         buttonRestart.addTarget(self, action: #selector(buttonResetAction), for: .touchUpInside)
+        buttonPlay.addTarget(self, action: #selector(buttonPlayAction), for: .touchUpInside)
         
         lightUp()
-        
     }
     
     //show when you get the pattern right
@@ -165,12 +171,67 @@ class ViewController: UIViewController
         brainImageViews.removeAll()
     }
     
-    func placeErrorBrain()
+    //handle if the user gets the pattern wrong
+    
+    //wrong emoji
+    func createWrongEmojiImage() -> UIImage
     {
-        //let brainImage = createBrainEmojiImage()
-        //let imageView = UIImageView(image: brainImage)
-        //imageView.frame = CGRect(x: 170, y: 750, width: 200, height: 200)
-        //self.view.addSubview(imageView)
+        // Create a UILabel to hold the emoji
+        let label = UILabel()
+        label.text = "❌"
+        label.font = UIFont.systemFont(ofSize: 200)  // Adjust size as needed
+        label.sizeToFit()
+        
+        // Render the label into a UIImage
+        UIGraphicsBeginImageContextWithOptions(label.bounds.size, false, 0)
+        label.layer.render(in: UIGraphicsGetCurrentContext()!)
+        let image = UIGraphicsGetImageFromCurrentImageContext()!
+        UIGraphicsEndImageContext()
+        
+        return image
+    }
+    
+    func placeWrongInput(at position: CGPoint) //previously 'placeErrorBrain()'
+    {
+        let xImage = createWrongEmojiImage()
+        let imageView = UIImageView(image: xImage)
+        imageView.frame = CGRect(origin: position, size: CGSize(width: 50, height: 50))
+        self.view.addSubview(imageView)
+        wrongInputImageViews.append(imageView)
+    }
+    
+    func placeWrongInput1()
+    {
+        placeWrongInput(at: CGPoint(x: 30, y: 750))
+    }
+    
+    func placeWrongInput2()
+    {
+        placeWrongInput(at: CGPoint(x: 100, y: 750))
+    }
+    
+    func placeWrongInput3()
+    {
+        placeWrongInput(at: CGPoint(x: 170, y: 750))
+    }
+    
+    func placeWrongInput4()
+    {
+        placeWrongInput(at: CGPoint(x: 240, y: 750))
+    }
+    
+    func placeWrongInput5()
+    {
+        placeWrongInput(at: CGPoint(x: 310, y: 750))
+    }
+    
+    func cleanupWrongInput()
+    {
+        for imageView in wrongInputImageViews
+        {
+            imageView.removeFromSuperview()
+        }
+        wrongInputImageViews.removeAll()
     }
     
     // Function to add background image
@@ -234,7 +295,7 @@ class ViewController: UIViewController
 //                self.view.backgroundColor = .black
 //            }
             
-            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 0.7)
+            DispatchQueue.main.asyncAfter(deadline: .now() + Double(index) * 1.0)
             {
                 switch val
                 {
@@ -261,11 +322,13 @@ class ViewController: UIViewController
 
     func checkSequence()
     {
+        
         guard let currentButtonPressed = currentButtonPressed else { return }
             
         if currentButtonPressed == currentSequenceElement[currentIndex]
         {
-            switch currentIndex 
+            self.couldWinCounter += 1
+            switch currentIndex
             {
                 case 0:
                     placeBrain1()
@@ -278,7 +341,7 @@ class ViewController: UIViewController
                 case 4:
                     placeBrain5()
                 default:
-                    placeErrorBrain()
+                    print("error: 112")
             }
                 
             currentIndex += 1
@@ -297,14 +360,70 @@ class ViewController: UIViewController
         else
         {
             // Handle incorrect button press (e.g., reset the game, show an error, etc.)
-            placeErrorBrain()
+            audioManager.playGuessWrongSound()
+            switch currentIndex
+            {
+                case 0:
+                    placeWrongInput1()
+                case 1:
+                    placeWrongInput2()
+                case 2:
+                    placeWrongInput3()
+                case 3:
+                    placeWrongInput4()
+                case 4:
+                    placeWrongInput5()
+                default:
+                    print("error: 112")
+            }
+            currentIndex += 1
             print("Incorrect button pressed.")
+            print("CurrenIndex: ", currentIndex)
+        }
+        
+        if currentIndex == 5
+        {
+            gameOver()
         }
     }
 
     func gameOver()
     {
-        // Example function
+        //either put confetti and play a win sound or tell the user that they lost and play a womp womp sound
+        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + delayInSeconds)
+//        {
+//            if self.couldWinCounter == 5 { self.audioManager.playHomeRunSound() }
+//            else { self.audioManager.playGameOverSound() }
+//        }
+        
+        if self.couldWinCounter == 5
+        {
+            DispatchQueue.main.asyncAfter(deadline: .now())
+            {
+                self.audioManager.playHomeRunSound()
+            }
+        }
+        else
+        {
+            DispatchQueue.main.asyncAfter(deadline: .now())
+            {
+                self.audioManager.playGameOverSound()
+            }
+        }
+        print("couldWinCounter: ", self.couldWinCounter)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        resetGame()
     }
 
     func resetGame()
@@ -313,6 +432,7 @@ class ViewController: UIViewController
         showSequence = currentSequenceElement
         currentIndex = 0
         lightUp()
+        couldWinCounter = 0
         
         removeBackgroundImage()
         
@@ -320,7 +440,19 @@ class ViewController: UIViewController
         startSpinningAnimation()
         
         cleanupBrains()
+        cleanupWrongInput()
+        
+        //call play button here
+        while currentButtonPressed != 9
+        {
+            //DO SOMETIHNG
+        }
     }
+    
+    
+    
+    
+    
     
     //Red Button
     private var buttonRed: UIButton =
@@ -337,6 +469,7 @@ class ViewController: UIViewController
         self.view.backgroundColor = .systemRed
         currentButtonPressed = 0
         checkSequence()
+        audioManager.playToyButtonSound()
     }
     
     func placeRedButton() -> Void
@@ -366,6 +499,7 @@ class ViewController: UIViewController
         self.view.backgroundColor = .systemGreen
         currentButtonPressed = 1
         checkSequence()
+        audioManager.playToyButtonSound()
     }
     
     func placeGreenButton() -> Void
@@ -395,6 +529,7 @@ class ViewController: UIViewController
         self.view.backgroundColor = .systemBlue
         currentButtonPressed = 2
         checkSequence()
+        audioManager.playToyButtonSound()
     }
     
     func placeBlueButton() -> Void
@@ -424,6 +559,7 @@ class ViewController: UIViewController
         self.view.backgroundColor = .systemYellow
         currentButtonPressed = 3
         checkSequence()
+        audioManager.playToyButtonSound()
     }
     
     func placeYellowButton() -> Void
@@ -452,6 +588,7 @@ class ViewController: UIViewController
     {
         self.view.backgroundColor = .systemGray
         resetGame()
+        audioManager.playRestartSound()
     }
     
     func placeResetButton() -> Void 
@@ -463,6 +600,37 @@ class ViewController: UIViewController
         view.addSubview(imageView)
             
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonResetAction))
+        imageView.addGestureRecognizer(tapGestureRecognizer)
+        }
+    
+    
+    //play button
+    private let buttonPlay: UIButton =
+    {
+        let button = UIButton()
+        button.backgroundColor = .systemPink
+        button.setTitle("Play", for: .normal)
+        button.setTitleColor(.black, for: .normal)
+        return button
+    }()
+    
+    @objc func buttonPlayAction()
+    {
+        self.view.backgroundColor = .systemGray
+        //resetGame() //should pressing play also reset the game?
+        currentButtonPressed = 9
+        audioManager.playRestartSound()
+    }
+    
+    func placePlayButton() -> Void
+    {
+        let imagePlayCircle = UIImage(named: "play_button")
+        let imageView = UIImageView(image: imagePlayCircle)
+        imageView.isUserInteractionEnabled = true // UIImageView is not interactive by default
+        imageView.frame = CGRect(x: 200, y: 800, width: buttonSizes, height: buttonSizes) // example frame
+        view.addSubview(imageView)
+            
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(buttonPlayAction))
         imageView.addGestureRecognizer(tapGestureRecognizer)
         }
     }
